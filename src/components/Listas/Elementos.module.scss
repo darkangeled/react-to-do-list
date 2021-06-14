@@ -1,0 +1,28 @@
+@import "../../sass/globals/palette";
+
+$list: $color-primario, $color-secundario, lighten($color-secundario, 20%);
+
+@mixin gradiente($direction, $list) {
+  background: -webkit-linear-gradient($direction, $list) !important;
+}
+
+.panel-heading {
+  @include gradiente(left,$list);
+  p {
+    color: $color-neutro;
+    font-size: 1.5em;
+    padding-bottom: 5px;
+  }
+}
+
+.mes {
+  font-style: italic;
+  font-size: 1em !important;
+  padding-top: 0;
+  padding-bottom: 15px !important;
+}
+
+.completada {
+  text-decoration: line-through;
+  color: $color-secundario;
+}

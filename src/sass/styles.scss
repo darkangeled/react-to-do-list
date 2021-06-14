@@ -1,0 +1,8 @@
+@charset "utf-8";
+@import './globals/palette';
+@import './globals/fonts';
+@import '../../node_modules/bulma/bulma.sass';
+
+html, body {
+  color: $color-primario;
+}

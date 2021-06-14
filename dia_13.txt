@@ -1,0 +1,115 @@
+https://reactjs.org/docs/state-and-lifecycle.html
+https://pastebin.com/3ai4mvH1
+
+import { useEffect, useReducer } from 'react';
+import './App.css';
+
+const ETAPAS = {
+  ARRANCANDO: 'Estoy arrancando',
+  CALENTANDO: 'Ya estoy calentando',
+  CORRIENDO: 'Ya estoy caliente y listo para correr ( ͡° ͜ʖ ͡°)', //Little Caesars
+}
+
+const ACCIONES_CONTADOR = {
+  INCREMENTAR: 'INCREASE_COUNTER',
+  DECREMENTAR: 'DECREASE_COUNTER',
+  REINICIAR: 'RESET_COUNTER',
+}
+
+const valorInicialContador = {
+  valor: 0,
+  etapa: ETAPAS.ARRANCANDO,
+  arranco: 'Fofo'
+}
+
+function App() {
+
+  useEffect(() => {
+    /*
+    setInterval(() => {
+      incrementarContador();
+    }, 5000)
+    */
+  }, [])
+
+  const obtenerEtapa = (temperatura) => {
+    let etapaActual;
+    if (temperatura < 4)
+      etapaActual = ETAPAS.ARRANCANDO;
+    else if(temperatura < 10)
+      etapaActual = ETAPAS.CALENTANDO;
+    else if(temperatura >= 10)
+      etapaActual = ETAPAS.CORRIENDO;
+    return etapaActual;
+  }
+  // constadorReducer = (lastState, action)=>
+  const contadorReducer = (estadoAnterior, action) => {
+    console.log("Estoy llamando al reductor " + action.accion);
+    switch (action.accion) {
+      case ACCIONES_CONTADOR.INCREMENTAR: {
+        const temperaturaAnterior = estadoAnterior.valor;
+        let etapaActual = obtenerEtapa(temperaturaAnterior);
+
+        return {
+          ...estadoAnterior,
+          etapa: etapaActual,
+          valor: temperaturaAnterior + 1
+        }
+      }
+
+      case ACCIONES_CONTADOR.DECREMENTAR: {
+        const temperaturaAnterior = estadoAnterior.valor;
+        let etapaActual = obtenerEtapa(temperaturaAnterior);
+        if(temperaturaAnterior >= 1){
+          return {
+            ...estadoAnterior,
+            etapa: etapaActual,
+            valor: temperaturaAnterior -1
+          }
+        }
+        else{
+          return estadoAnterior
+        }
+      }
+      case ACCIONES_CONTADOR.REINICIAR: {
+        return valorInicialContador;
+      }
+
+      default: {
+        return estadoAnterior;
+      }
+    }
+  }
+
+  const [stateContador, dispatchContadorEvent] = useReducer(contadorReducer, valorInicialContador);
+
+  const incrementarContador = () => {
+    dispatchContadorEvent({ accion: ACCIONES_CONTADOR.INCREMENTAR, datos: { step: 1, user: 'Edna' } })
+  }
+
+  const decrementarContador = () => {
+    dispatchContadorEvent({ accion: ACCIONES_CONTADOR.DECREMENTAR, datos: { step: 1 } })
+  }
+
+  const reiniciarContador = () => {
+    dispatchContadorEvent({ accion: ACCIONES_CONTADOR.REINICIAR })
+  }
+
+  return (
+    <div className="App">
+      <p>
+        {stateContador.valor}
+      </p>
+      <p>
+        {stateContador.etapa}
+      </p>
+      <div>
+        <button onClick={incrementarContador}>Incrementar</button>
+        <button onClick={decrementarContador}>Decrementar</button>
+        <button onClick={reiniciarContador}>Reiniciar</button>
+      </div>
+    </div>
+  );
+}
+
+export default App;
