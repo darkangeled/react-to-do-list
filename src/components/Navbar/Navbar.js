@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import "../../sass/styles.scss";
+import Logo from '../../assets/logo.png';
 
 const Navbar = () => {
   return (
@@ -7,10 +8,7 @@ const Navbar = () => {
       <nav className="navbar" role="navigation" aria-label="main navigation">
         <div className="navbar-brand">
           <a className="navbar-item" href="#">
-            <img
-              src="https://todolist.org.uk/wp-content/uploads/2017/12/todolistlogo-1.png"
-              alt="Logo to do list"
-            />
+            <img src={Logo} alt="Logo to do list" width="112" height="28" />
           </a>
 
           <a
@@ -28,6 +26,7 @@ const Navbar = () => {
 
         <div id="navbarBasicExample" className="navbar-menu">
           <div className="navbar-start">
+            <a className="navbar-item">Inicio</a>
             <a className="navbar-item">To Do List</a>
             <a className="navbar-item">Salir</a>
           </div>
