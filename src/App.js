@@ -10,6 +10,7 @@ const ACCIONES_LISTA = {
   AGREGAR_TAREA: "AGREGAR NUEVA TAREA",
   ELIMINAR_TAREA: "ELIMINAR UNA TAREA",
   COMPLETAR_TAREA: "COMPLETAR UNA TAREA",
+  NUEVA_LISTA: "INICIALIZANDO TAREAS",
 };
 
 const ERRORES = {
@@ -17,7 +18,7 @@ const ERRORES = {
   DUPLICADO: "Ya existe esa tarea",
 }
 
-const valorIniciales = { accion: "NUEVA LISTA", tareasCompletadas: 0, tareasTotal: 0, misTareas: [] };
+const valorIniciales = { accion: ACCIONES_LISTA.NUEVA_LISTA, tareasCompletadas: 0, tareasTotal: 0, misTareas: [], completadas: [] };
 
 const existeError = (valor) => {
   let error;
@@ -25,20 +26,51 @@ const existeError = (valor) => {
   if(valor.trim().length < 4 && valor.trim().length > 0){
     error = true;
     txt = ERRORES.CARACTERES;
-    return { error, txt };
   } else {
-    valorIniciales.misTareas.find((tarea) =>
-      tarea === valor
-        ? ((error = true), (txt = ERRORES.DUPLICADO))
-        : ((error = false), (txt = ""))
-    );
-    return { error, txt };
+    error = false;
+    txt = "";
   }
-};
+  return { error, txt };
+}
+
+// const existeTarea = (valor) => {
+//   let error;
+//   let txt;
+//   let existe = JSON.parse(localStorage.getItem("Lista_Tareas")).find((tarea) => tarea === valor);
+//   if(existe){
+//     error = true;
+//     txt = ERRORES.DUPLICADO; 
+//   } else {
+//     error = false;
+//     txt = "";
+//   }
+//   return { error, txt };
+// };
+const existeSession = () => {
+  if(!localStorage.getItem("Lista_Tareas")){
+    localStorage.setItem("Lista_Tareas");
+    return false;
+  } else {
+    valorIniciales.misTareas = JSON.parse(localStorage.getItem("Lista_Tareas"));
+    return true;
+  }
+}
 
 const tareasReducer = (estadoAnterior, action) => {
   console.log("Reducer - " + action.accion);
   switch (action.accion) {
+    case ACCIONES_LISTA.NUEVA_LISTA: {
+      if(existeSession() === true){
+        return {
+          ...estadoAnterior,
+          tarea: valorIniciales.misTareas
+        }
+      } else {
+        return {
+          ...estadoAnterior
+        }
+      }
+    }
     case ACCIONES_LISTA.CAMBIAR_INPUT: {
       let { error, txt } = existeError(action.datos.valor);
       if (error) {
@@ -49,7 +81,6 @@ const tareasReducer = (estadoAnterior, action) => {
           inputTarea: action.datos.valor.trim(),
         };
       } else {
-        let { error, txt } = existeError(action.datos.valor);
         return {
           ...estadoAnterior,
           error: error,
@@ -63,7 +94,7 @@ const tareasReducer = (estadoAnterior, action) => {
       if (error === true && ((action.datos.trigger === action.datos.evento) || action.datos.trigger === "Botón")) {
         return {
           ...estadoAnterior,
-          error: error,
+          error: true,
           errorTxt: txt,
           inputTarea: action.datos.valor.trim(),
         };
@@ -86,7 +117,6 @@ const tareasReducer = (estadoAnterior, action) => {
     case ACCIONES_LISTA.ELIMINAR_TAREA: {
       const misTareasRestantes = estadoAnterior.tarea.filter((tarea, iteracion) => iteracion !== action.datos.id);
       localStorage.setItem("Lista_Tareas", JSON.stringify(misTareasRestantes));
-
       return {
         ...estadoAnterior,
         tarea : misTareasRestantes,
@@ -101,6 +131,7 @@ const tareasReducer = (estadoAnterior, action) => {
           tareasCompletadas: tareasAnterioresCompletadas + 1,
           tachar: "completada",
           bloquear: "disabled",
+          elemSeleccionado: action.datos.id,
         };
       } else {
         return {
@@ -119,7 +150,7 @@ const tareasReducer = (estadoAnterior, action) => {
 
 function App() {
   useEffect(() => {
-    !localStorage.getItem("Lista_Tareas") ? localStorage.setItem("Lista_Tareas",valorIniciales.misTareas) : JSON.stringify(localStorage.getItem("Lista_Tareas"));
+    dispatcherTareasEvent({ accion: valorIniciales.accion });
   }, []);
 
   const [stateTarea, dispatcherTareasEvent] = useReducer(
@@ -127,15 +158,8 @@ function App() {
     valorIniciales
   );
 
-
-  /*useEffect(() => {
-    console.log("Mi input debe cambiar a: ", stateTarea.inputTarea);
-    setValorInput(stateTarea.inputTarea);
-    setMisTareas(stateTarea.tarea);
-  },[stateTarea.inputTarea,stateTarea.tarea]);*/
-
   const onAddButtonHandler = () => {
-    dispatcherTareasEvent({ accion: ACCIONES_LISTA.AGREGAR_TAREA, datos: {evento: "Botón", total: 0, valor: stateTarea.inputTarea }});
+    dispatcherTareasEvent({ accion: ACCIONES_LISTA.AGREGAR_TAREA, datos: {trigger: "Botón", total: 0, valor: stateTarea.inputTarea }});
   };
 
   const onChangeInputHandler = (event) => {
@@ -150,8 +174,8 @@ function App() {
     dispatcherTareasEvent({ accion: ACCIONES_LISTA.ELIMINAR_TAREA, datos: { id: id } });
   };
 
-  const onChangeCheckboxHandler = (event) => {
-    dispatcherTareasEvent({ accion: ACCIONES_LISTA.COMPLETAR_TAREA, datos: { valor: event.target.checked, tareas: 0 }});
+  const onChangeCheckboxHandler = (valor,id) => {
+    dispatcherTareasEvent({ accion: ACCIONES_LISTA.COMPLETAR_TAREA, datos: { valor: valor, id:id, tareas: 0 }});
   };
   return (
     <>
@@ -180,8 +204,9 @@ function App() {
                       key={iteracion}
                       onDelete={onDeleteHandler}
                       onChange={onChangeCheckboxHandler}
-                      className={stateTarea.tache}
+                      className={stateTarea.tachar}
                       disabled={stateTarea.bloquear}
+                      seleccionado={stateTarea.elemSeleccionado}
                     >
                       {tarea}
                     </Tarea>

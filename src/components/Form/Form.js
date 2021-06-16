@@ -1,7 +1,7 @@
 import styles from './Form.module.scss';
 import { Error } from '../Listas/Elementos';
 
-const Form = ({ valor, onClick, onChange, onKeyDown, error, errorTxt }) => {
+const Form = ({ value, onClick, onChange, onKeyDown, error, errorTxt }) => {
   return (
     <div className="field has-addons">
       <div className="control is-expanded">
@@ -11,7 +11,7 @@ const Form = ({ valor, onClick, onChange, onKeyDown, error, errorTxt }) => {
           placeholder="Agregue sus tareas a la lista de pendientes"
           onChange={onChange}
           onKeyDown={onKeyDown}
-          value={valor}
+          value={value}
         />
         {error && <Error texto={errorTxt} />}
       </div>
