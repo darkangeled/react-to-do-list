@@ -1,4 +1,4 @@
-import { useState, useReducer, useEffect } from "react";
+import { useReducer, useEffect } from "react";
 import "./sass/styles.scss";
 import Navbar from "./components/Navbar/Navbar";
 import Lista from "./components/Listas/Lista";
@@ -61,7 +61,6 @@ const tareasReducer = (estadoAnterior, action) => {
     case ACCIONES_LISTA.AGREGAR_TAREA: {
       let { error, txt } = existeError(action.datos.valor);
       if (error === true && ((action.datos.trigger === action.datos.evento) || action.datos.trigger === "Botón")) {
-        console.log("Entre 1: ",txt);
         return {
           ...estadoAnterior,
           error: error,
@@ -69,28 +68,29 @@ const tareasReducer = (estadoAnterior, action) => {
           inputTarea: action.datos.valor.trim(),
         };
       } else {
-        console.log("Entre 2: ", txt);
         let tareasAnterior = estadoAnterior.tarea || valorIniciales.misTareas;
-        localStorage.setItem("Lista_Tareas", JSON.stringify([...tareasAnterior,action.datos.valor]));
+        localStorage.setItem(
+          "Lista_Tareas",
+          JSON.stringify([...tareasAnterior, action.datos.valor.trim()])
+        );
         return {
           ...estadoAnterior,
           error: error,
           errorTxt: txt,
-          inputTarea: "",
-          tarea: [...tareasAnterior, action.datos.valor],
+          inputTarea: '',
+          tarea: [...tareasAnterior, action.datos.valor.trim()],
           tareasTotal: estadoAnterior.tareasTotal + 1,
         };
       }
     }
     case ACCIONES_LISTA.ELIMINAR_TAREA: {
       const misTareasRestantes = estadoAnterior.tarea.filter((tarea, iteracion) => iteracion !== action.datos.id);
-      // estadoAnterior.tarea.splice(action.datos.id, 1);
-      // localStorage.setItem("Lista_Tareas", JSON.stringify(misTareasRestantes));
-      console.log(misTareasRestantes);
+      localStorage.setItem("Lista_Tareas", JSON.stringify(misTareasRestantes));
 
       return {
         ...estadoAnterior,
-        tareas : misTareasRestantes
+        tarea : misTareasRestantes,
+        tareasTotal: estadoAnterior.tareasTotal - 1,
       };
     }
     case ACCIONES_LISTA.COMPLETAR_TAREA: {
@@ -118,11 +118,8 @@ const tareasReducer = (estadoAnterior, action) => {
 };
 
 function App() {
-  const [misTareas, setMisTareas] = useState([]);
-  const [valorInput, setValorInput] = useState("");
-
   useEffect(() => {
-    !localStorage.getItem("Lista_Tareas") ? localStorage.setItem("Lista_Tareas",valorIniciales.misTareas) : setMisTareas(JSON.stringify(localStorage.getItem("Lista_Tareas")));
+    !localStorage.getItem("Lista_Tareas") ? localStorage.setItem("Lista_Tareas",valorIniciales.misTareas) : JSON.stringify(localStorage.getItem("Lista_Tareas"));
   }, []);
 
   const [stateTarea, dispatcherTareasEvent] = useReducer(
@@ -131,11 +128,11 @@ function App() {
   );
 
 
-  useEffect(() => {
+  /*useEffect(() => {
     console.log("Mi input debe cambiar a: ", stateTarea.inputTarea);
     setValorInput(stateTarea.inputTarea);
     setMisTareas(stateTarea.tarea);
-  },[stateTarea.inputTarea,stateTarea.tarea]);
+  },[stateTarea.inputTarea,stateTarea.tarea]);*/
 
   const onAddButtonHandler = () => {
     dispatcherTareasEvent({ accion: ACCIONES_LISTA.AGREGAR_TAREA, datos: {evento: "Botón", total: 0, valor: stateTarea.inputTarea }});
@@ -167,7 +164,7 @@ function App() {
                 <div className="panel-block">
                   <div className="control has-icons">
                     <Form
-                      value={valorInput}
+                      value={stateTarea.inputTarea}
                       onClick={onAddButtonHandler}
                       onKeyDown={onKeyDownHandler}
                       onChange={onChangeInputHandler}
@@ -176,8 +173,8 @@ function App() {
                     ></Form>
                   </div>
                 </div>
-                {misTareas &&
-                  misTareas.map((tarea, iteracion) => (
+                {stateTarea.tarea &&
+                  stateTarea.tarea.map((tarea, iteracion) => (
                     <Tarea
                       id={iteracion}
                       key={iteracion}
