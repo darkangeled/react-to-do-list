@@ -1,0 +1,6 @@
+tareas [
+  {nombre: "comer calabaza", estado: 1},
+  {nombre: "comer carne", estado: 0},
+]
+
+  {listaTareas: action.datos.valor.trim(), statusTareas: action.datos.status}

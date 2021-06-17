@@ -46,11 +46,19 @@ export const Tarea = (props) => {
   const checkHandler = (event) => {
     props.onChange(event.target.checked, props.id);
   };
+  
   return (
     <label className="panel-block is-justify-content-space-between">
       <div className="is-pulled-left">
-        <input type="checkbox" key={props.id} onChange={checkHandler} />
-        <span className={props.seleccionado === props.id ? styles[props.className] : ''}>{props.children}</span>
+        <input
+          type="checkbox"
+          key={props.id}
+          onChange={checkHandler}
+          checked={props.estado === 1 ? "checked" : ""}
+        />
+        <span className={props.estado === 1 ? styles.completada : ""}>
+          {props.children}
+        </span>
       </div>
       <div className="is-pulled-right">
         <button
@@ -59,7 +67,7 @@ export const Tarea = (props) => {
           key={props.id}
           id={props.id}
           onClick={deleteHandler}
-          disabled={props.seleccionado === props.id ? props.disabled : ''}
+          disabled={props.estado === 1 ? "disabled" : ""}
         >
           <span className="icon is-small material-icons">delete</span>
         </button>
